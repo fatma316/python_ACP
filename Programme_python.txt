@@ -1,0 +1,60 @@
+# changer le repertoire courant
+import os
+os.chdir("C:/voitures")
+# importation des donnees
+import pandas 
+voiture = pandas.read_table("voitures.txt",sep="\t",header=0)
+print(voiture)
+# analyse descriptive des donnees
+print(voiture.describe())
+# analyse graphique bidimentionnelle
+from pandas.tools.plotting import scatter_matrix 
+scatter_matrix(voiture,figsize=(6,6))
+# selection des variables quantitatives
+x = voiture.ix[:,1:7].values
+print(x)
+# selection des variables qualitatives
+y = voiture.ix[:,0]
+print(y)
+# matrice et graphiaue de correlation
+corr=voiture.corr()
+print(corr)
+import seaborn as sns
+sns.heatmap(corr, 
+            xticklabels=corr.columns.values,
+            yticklabels=corr.columns.values)
+# matrice de covariance
+cov=voiture.cov()
+print(cov)
+# centree et reduire les donnees
+from sklearn import preprocessing
+voiturecr = preprocessing.scale(x)
+print(voiturecr)
+# Calculer les valeurs et vecteurs propres
+import numpy as np
+eig_vals, eig_vecs = np.linalg.eig(corr)
+print(eig_vals)
+print(eig_vecs)
+print('Eigenvectors \n%s' %eig_vecs)
+print('\nEigenvalues \n%s' %eig_vals)
+eig_pairs = [(np.abs(eig_vals[i]), eig_vecs[:,i]) for i in range(len(eig_vals))]
+print(eig_pairs)
+eig_pairs.sort(key=lambda x: x[0], reverse=True)
+print(eig_pairs)
+tot = sum(eig_vals)
+var_exp = [(i / tot)*100 for i in sorted(eig_vals, reverse=True)]
+cum_var_exp = np.cumsum(var_exp)
+matrix_w = np.hstack((eig_pairs[0][1].reshape(6,1),
+                      eig_pairs[1][1].reshape(6,1)))
+
+print('Matrix W:\n', matrix_w)
+Y = x.dot(matrix_w)
+print(Y)
+from sklearn.decomposition import PCA 
+acp = PCA(n_components=2).fit_transform(x)
+print('Coordonnées des variables: \n', acp.components_ )
+import numpy
+z=numpy.transpose(x)
+c=corr
+c=z*x
+print(c)
